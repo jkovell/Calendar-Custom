@@ -433,8 +433,16 @@ class Calendar extends RowPluginBase {
 //        $db_tz   = date_get_timezone_db($tz_handling, isset($item->$tz_field) ? $item->$tz_field : timezone_name_get($dateInfo->getTimezone()));
 //        $to_zone = date_get_timezone($tz_handling, isset($item->$tz_field)) ? $item->$tz_field : timezone_name_get($dateInfo->getTimezone());
 
-        $item_start_date = \DateTime::createFromFormat($storage_format, $row->{$info['query_name']});
-        $item_end_date = \DateTime::createFromFormat($storage_format, $row->{$info['query_name']});
+        // If timezone offset is enabled, set start and end dates in UTC.
+        if (\Drupal::config('calendar.settings')->get('timezone_offset')) {
+          $timezone = new \DateTimeZone('UTC');
+          $item_start_date = \DateTime::createFromFormat($storage_format, $row->{$info['query_name']}, $timezone);
+          $item_end_date = \DateTime::createFromFormat($storage_format, $row->{$info['query_name']}, $timezone); 
+        }
+        else {
+          $item_start_date = \DateTime::createFromFormat($storage_format, $row->{$info['query_name']});
+          $item_end_date = \DateTime::createFromFormat($storage_format, $row->{$info['query_name']});          
+        }
 
         // @todo don't hardcode
 //        $granularity = date_granularity_precision($cck_field['settings']['granularity']);
